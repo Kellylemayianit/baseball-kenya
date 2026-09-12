@@ -1,0 +1,151 @@
+/* ==========================================================================
+   CARDS — bench-style surfaces for teams and matches
+   ========================================================================== */
+
+.section {
+  padding-block: var(--space-8);
+  border-bottom: var(--border-hair);
+}
+.section__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+.section__head p { margin: var(--space-2) 0 0; }
+
+.grid {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+}
+
+/* ---- Team card ---- */
+.team-card {
+  display: block;
+  text-decoration: none;
+  background: var(--pitch-700);
+  border: var(--border-hair);
+  border-top: 3px solid var(--clay-500);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  transition: border-color var(--dur-med) var(--ease-out), transform var(--dur-med) var(--ease-out);
+}
+.team-card:hover {
+  border-color: var(--line-600);
+  transform: translateY(-2px);
+}
+.team-card__crest {
+  width: 3rem; height: 3rem;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--pitch-800);
+  color: var(--floodlight-500);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+  margin-bottom: var(--space-4);
+}
+.team-card__name {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  color: var(--chalk-100);
+  margin-bottom: var(--space-1);
+}
+.team-card__base {
+  font-size: var(--step--1);
+  color: var(--ink-500);
+  margin-bottom: var(--space-4);
+}
+.team-card__stats {
+  display: flex;
+  gap: var(--space-5);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  border-top: var(--border-hair);
+  padding-top: var(--space-3);
+}
+.team-card__stat b {
+  display: block;
+  color: var(--chalk-100);
+  font-size: var(--step-0);
+}
+.team-card__stat span {
+  color: var(--ink-500);
+}
+
+/* ---- Match card ---- */
+.match-card {
+  background: var(--pitch-700);
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.match-card__status {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  padding: 0.2em 0.7em;
+  border-radius: 999px;
+  border: 1px solid var(--line-600);
+  color: var(--chalk-200);
+}
+.match-card__status--live {
+  color: var(--pitch-900);
+  background: var(--floodlight-500);
+  border-color: var(--floodlight-500);
+}
+.match-card__status--final { color: var(--ink-500); }
+.match-card__status--scheduled { color: var(--chalk-200); }
+
+.match-card__teams {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.match-card__team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+}
+.match-card__team--winner { color: var(--chalk-100); font-weight: 700; }
+.match-card__team--loser { color: var(--ink-500); }
+.match-card__score { font-size: var(--step-1); }
+
+.match-card__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--step--1);
+  color: var(--ink-500);
+  border-top: var(--border-hair);
+  padding-top: var(--space-3);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+}
+.badge--clay { background: rgba(201, 162, 39, 0.18); color: var(--clay-300); }
+.badge--win { background: rgba(107, 143, 78, 0.18); color: var(--win-500); }
+.badge--loss { background: rgba(177, 75, 60, 0.18); color: var(--loss-500); }
+
+.empty-state {
+  border: 1px dashed var(--line-600);
+  border-radius: var(--radius-md);
+  padding: var(--space-7);
+  text-align: center;
+  color: var(--ink-500);
+}
+.empty-state h3 { color: var(--chalk-200); }

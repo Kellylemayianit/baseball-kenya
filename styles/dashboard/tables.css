@@ -1,0 +1,125 @@
+/* ==========================================================================
+   DASHBOARD TABLES — match proceedings ledger
+   ========================================================================== */
+
+.panel {
+  background: var(--pitch-700);
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: var(--border-hair);
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.panel__head h3 { margin: 0; }
+
+.proceedings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+.proceedings-table thead th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--ink-500);
+  padding: var(--space-3) var(--space-5);
+  border-bottom: var(--border-hair);
+  white-space: nowrap;
+}
+.proceedings-table tbody td {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: var(--border-hair);
+  color: var(--chalk-200);
+  vertical-align: middle;
+}
+.proceedings-table tbody tr:last-child td { border-bottom: none; }
+.proceedings-table tbody tr:hover { background: var(--pitch-800); }
+
+.proceedings-table .cell-strong { color: var(--chalk-100); font-weight: 600; }
+.proceedings-table .cell-actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
+
+.status-pill {
+  display: inline-block;
+  padding: 0.2em 0.7em;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  border: 1px solid var(--line-600);
+}
+.status-pill--live { background: var(--floodlight-500); color: var(--pitch-900); border-color: var(--floodlight-500); }
+.status-pill--final { color: var(--ink-500); }
+.status-pill--scheduled { color: var(--chalk-200); }
+
+/* ---- Modal (match form) ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 6, 3, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  z-index: 100;
+}
+.modal {
+  width: min(32rem, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--pitch-800);
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-bench);
+}
+.modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5);
+  border-bottom: var(--border-hair);
+}
+.modal__body { padding: var(--space-5); }
+.modal__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-top: var(--border-hair);
+}
+
+.form-field { margin-bottom: var(--space-4); }
+.form-field label {
+  display: block;
+  font-size: var(--step--1);
+  color: var(--ink-500);
+  margin-bottom: var(--space-2);
+}
+.form-field input,
+.form-field select {
+  width: 100%;
+  background: var(--pitch-900);
+  border: 1px solid var(--line-600);
+  border-radius: var(--radius-sm);
+  color: var(--chalk-100);
+  padding: var(--space-3);
+  font: inherit;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+.form-error {
+  color: var(--loss-500);
+  font-size: var(--step--1);
+  margin-top: var(--space-4);
+}
+
+@media (max-width: 560px) {
+  .form-row { grid-template-columns: 1fr; }
+}

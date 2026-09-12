@@ -1,0 +1,75 @@
+/* ==========================================================================
+   BUTTONS — clay-accent primary action, quiet ghost/secondary variants
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.7em 1.3em;
+  font-family: var(--font-body);
+  font-size: var(--step--1);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1;
+  transition: background-color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--clay-500);
+  color: var(--chalk-100);
+  border-color: var(--clay-500);
+}
+.btn-primary:hover { background: var(--clay-600); border-color: var(--clay-600); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--chalk-100);
+  border-color: var(--line-600);
+}
+.btn-secondary:hover { border-color: var(--chalk-200); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--floodlight-500);
+  border-color: transparent;
+  padding-inline: 0.4em;
+}
+.btn-ghost:hover { color: var(--floodlight-300); }
+
+.btn-danger {
+  background: transparent;
+  color: var(--loss-500);
+  border-color: var(--loss-500);
+}
+.btn-danger:hover { background: var(--loss-500); color: var(--chalk-100); }
+
+.btn-block { width: 100%; justify-content: center; }
+.btn-sm { padding: 0.45em 0.9em; font-size: var(--step--1); }
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-700);
+  background: transparent;
+  color: var(--chalk-200);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.icon-btn:hover { border-color: var(--chalk-200); color: var(--chalk-100); }
