@@ -5,13 +5,17 @@ name = "baseball-kenya"
 compatibility_date = "2026-09-01"
 pages_build_output_dir = "."
 
+[assets]
+directory = "./public"
+not_found_handling = "single-page-application"
+
 # D1 database binding. The database_id is filled in for you by
 # `wrangler d1 create baseball-kenya` — copy the id it prints into the line
 # below (docs/deploy.md, step 3).
 [[d1_databases]]
 binding = "DB"
 database_name = "baseball-kenya"
-database_id = "FILL IN — from `wrangler d1 create baseball-kenya`"
+database_id = "ba384f08-addc-4b8e-9897-b368dfbabb22"
 
 # Non-secret config the Worker reads at request time (server-lib/access.js).
 [vars]
