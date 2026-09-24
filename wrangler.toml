@@ -5,9 +5,6 @@ name = "baseball-kenya"
 compatibility_date = "2026-09-01"
 pages_build_output_dir = "."
 
-[assets]
-directory = "./public"
-not_found_handling = "single-page-application"
 
 # D1 database binding. The database_id is filled in for you by
 # `wrangler d1 create baseball-kenya` — copy the id it prints into the line
