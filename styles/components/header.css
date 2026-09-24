@@ -1,0 +1,149 @@
+/* header.css */
+:root { scroll-padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 1rem); }
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: rgb(255 255 255 / 0.96);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: saturate(1.2) blur(6px);
+}
+:root[data-theme="dark"] .site-header { background: rgb(14 20 32 / 0.92); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .site-header { background: rgb(14 20 32 / 0.92); }
+}
+
+.site-header__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: var(--header-h);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 3.6vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.brand svg { width: 1.7rem; height: 1.7rem; flex: none; color: var(--stitch); }
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  margin-left: auto;
+}
+.nav__link {
+  padding: 0.5rem 0.85rem;
+  border-bottom: 3px solid transparent;
+  font-weight: 700;
+  text-decoration: none;
+}
+.nav__link:hover { color: var(--stitch-deep); }
+.nav__link[aria-current="page"] { border-bottom-color: var(--stitch); }
+
+.nav-toggle { display: none; flex: none; }
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.theme-toggle:hover { background: var(--chalk); }
+.theme-toggle svg { width: 1.2rem; height: 1.2rem; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: inline; }
+
+/* Sign-in / account menu */
+.session { position: relative; margin-left: var(--s-2); }
+.session summary { list-style: none; cursor: pointer; }
+.session summary::-webkit-details-marker { display: none; }
+
+.session__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 50;
+  width: max(18rem, min(90vw, 20rem));
+  max-height: min(28rem, calc(100dvh - var(--header-h) - 2rem));
+  overflow-y: auto;
+  padding: var(--s-2);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  box-shadow: var(--shadow-pop);
+}
+.session__group {
+  padding: 0.4rem 0.75rem 0.2rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+.session__item {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 0;
+  border-radius: var(--r-s);
+  background: none;
+  text-align: left;
+  text-decoration: none;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+}
+.session__item:hover { background: var(--chalk); }
+.session__item small { display: block; font-weight: 400; color: var(--ink-soft); }
+.session__note { padding: 0.5rem 0.75rem 0.25rem; font-size: var(--text-xs); color: var(--ink-faint); }
+
+@media (max-width: 52em) {
+  .nav-toggle { display: inline-flex; }
+
+  .nav {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    max-height: calc(100dvh - var(--header-h) - env(safe-area-inset-top, 0px));
+    overflow-y: auto;
+    padding: var(--s-3) var(--gutter) calc(var(--s-4) + env(safe-area-inset-bottom, 0px));
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-pop);
+  }
+  .nav[data-open="true"] { display: flex; }
+
+  .nav__link {
+    padding: 0.85rem 0.75rem;
+    border-bottom: 0;
+    border-left: 3px solid transparent;
+  }
+  .nav__link[aria-current="page"] { border-left-color: var(--stitch); }
+
+  .session { margin: var(--s-3) 0 0; width: 100%; }
+  .session summary .btn { width: 100%; }
+  .session__menu { position: static; width: 100%; margin-top: var(--s-2); box-shadow: none; max-height: none; }
+}

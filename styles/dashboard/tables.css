@@ -1,0 +1,74 @@
+/* tables.css — standings, rosters, dashboard lists, line scores */
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--paper);
+}
+.table { width: 100%; font-size: var(--text-s); font-variant-numeric: tabular-nums; }
+.table th, .table td {
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+}
+.table thead th { background: var(--chalk); color: var(--ink-soft); font-size: var(--text-xs); font-weight: 700; }
+.table tbody tr:last-child > * { border-bottom: 0; }
+.table .l { text-align: left; }
+.table .c { text-align: center; }
+.table tbody th { font-weight: 700; }
+.table__rank { width: 2.75rem; color: var(--ink-faint); text-align: left; }
+.table tbody tr.is-leader > :first-child { box-shadow: inset 3px 0 0 var(--stitch); }
+.table__team { display: inline-flex; align-items: center; gap: 0.6rem; font-weight: 700; text-decoration: none; }
+.table__team:hover { text-decoration: underline; }
+.table__team .crest { --size: 1.75rem; }
+.table .pct { font-weight: 800; }
+.table__actions { display: flex; flex-wrap: wrap; gap: var(--s-2); justify-content: flex-end; }
+.table .input { min-height: 2.25rem; padding-block: 0.3rem; min-width: 11rem; }
+
+@media (max-width: 30em) {
+  .table { font-size: 0.82rem; }
+  .table th, .table td { padding: 0.55rem 0.55rem; }
+  .table__team .crest { --size: 1.5rem; }
+}
+
+/* Last five results */
+.form-dots { display: inline-flex; gap: 3px; }
+.dot {
+  display: grid;
+  place-items: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 3px;
+  background: var(--ink-faint);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+.dot--W { background: var(--pitch); }
+.dot--L { background: var(--stitch); }
+
+/* Line score (inning by inning) */
+.linescore-wrap { overflow-x: auto; }
+.linescore { width: 100%; font-family: var(--font-display); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.linescore th, .linescore td { min-width: 2rem; padding: 0.4rem 0.3rem; text-align: center; }
+.linescore thead th { font-size: 0.8rem; font-weight: 600; opacity: 0.75; }
+.linescore .ls-team { padding-left: 0; text-align: left; font-weight: 800; white-space: nowrap; }
+.linescore .ls-total { border-left: 1px solid var(--line-strong); font-weight: 800; }
+.linescore tbody th, .linescore tbody td { border-top: 1px solid var(--line); }
+
+.linescore--board { color: var(--board-text); font-size: 1.25rem; }
+.linescore--board th, .linescore--board td { padding: 0.55rem 0.3rem; }
+.linescore--board tbody th, .linescore--board tbody td { border-top-color: var(--board-line); }
+.linescore--board .ls-total { border-left-color: var(--board-line); }
+.linescore--board .ls-win { background: var(--stitch); border-radius: 4px; color: #fff; }
+
+/* Result entry grid inside the modal */
+.entry-scroll { overflow-x: auto; }
+.entry-grid { width: 100%; font-variant-numeric: tabular-nums; }
+.entry-grid th, .entry-grid td { padding: 0.25rem; text-align: center; }
+.entry-grid thead th { font-size: var(--text-xs); color: var(--ink-soft); }
+.entry-grid .ls-team { min-width: 8rem; text-align: left; font-weight: 700; }
+.entry-grid .input { width: 2.9rem; min-height: 2.6rem; padding: 0.3rem 0; text-align: center; }
+.entry-grid output { display: inline-block; min-width: 2ch; font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; }

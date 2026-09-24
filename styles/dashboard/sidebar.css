@@ -1,0 +1,133 @@
+/* sidebar.css — dashboard shell */
+.dash { display: grid; gap: var(--s-6); padding-block: var(--s-6) var(--s-7); }
+@media (min-width: 60em) {
+  .dash { grid-template-columns: 15.5rem minmax(0, 1fr); align-items: start; }
+  .sidebar { position: sticky; top: calc(var(--header-h) + 1rem); }
+}
+
+.sidebar { padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--r-m); background: var(--paper); }
+.sidebar__who {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-width: 0;
+  margin-bottom: var(--s-2);
+  padding: var(--s-2) var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--line);
+}
+.sidebar__who strong { display: block; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar__who small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.sidebar__who small { color: var(--ink-soft); }
+
+.sidebar__nav { display: flex; flex-direction: column; gap: 2px; }
+.sidebar__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--r-s);
+  color: var(--ink-soft);
+  font-weight: 700;
+  text-decoration: none;
+}
+.sidebar__link svg { width: 1.2rem; height: 1.2rem; flex: none; }
+.sidebar__link:hover { background: var(--chalk); color: var(--ink); }
+.sidebar__link[aria-current="page"] { background: var(--surface-strong); color: var(--on-surface-strong); }
+.sidebar__count {
+  margin-left: auto;
+  min-width: 1.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--stitch);
+  color: #fff;
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+/* Below the sidebar breakpoint, the sidebar becomes a fixed bottom tab bar —
+   the standard mobile pattern, and far easier to reach one-handed than a
+   panel buried above the content. */
+@media (max-width: 59.99em) {
+  .dash { padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)); }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 45;
+    border-radius: 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+    padding: var(--s-1) var(--s-1) calc(var(--s-1) + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -8px 20px rgb(13 34 64 / 0.12);
+  }
+  .sidebar__who { display: none; }
+
+  .sidebar__nav { flex-direction: row; justify-content: space-around; gap: 0; }
+  .sidebar__link {
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.4rem 0.2rem;
+    border-radius: var(--r-s);
+    font-size: 0.68rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .sidebar__link svg { width: 1.35rem; height: 1.35rem; }
+  .sidebar__count {
+    position: absolute;
+    top: 0;
+    right: 0.35rem;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 0.3rem;
+    font-size: 0.6rem;
+    line-height: 1.1rem;
+  }
+}
+
+.dash__main { display: grid; gap: var(--s-6); min-width: 0; }
+.dash__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.dash__head > *:first-child { min-width: 0; flex: 1 1 16rem; }
+.dash__head h1 { font-size: clamp(1.6rem, 5vw, 2.5rem); }
+.dash__head p { margin-top: var(--s-1); color: var(--ink-soft); }
+
+.panel { padding: clamp(var(--s-4), 4vw, var(--s-5)); border: 1px solid var(--line); border-radius: var(--r-m); min-width: 0; }
+.panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+}
+.panel__head > *:first-child { min-width: 0; }
+.panel__head p { color: var(--ink-soft); font-size: var(--text-s); }
+
+/* Signed-out gate */
+.gate { display: grid; gap: var(--s-6); padding-block: var(--s-6) var(--s-7); }
+@media (min-width: 60em) { .gate { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
+.gate__roles { display: grid; gap: var(--s-3); margin-top: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+.role-option {
+  display: block;
+  width: 100%;
+  padding: var(--s-4);
+  border: 2px solid var(--line-strong);
+  border-radius: var(--r-m);
+  background: var(--paper);
+  text-align: left;
+  cursor: pointer;
+}
+.role-option:hover { border-color: var(--ink); }
+.role-option strong { display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-display); font-size: 1.1rem; }
+.role-option strong svg { width: 1.15rem; height: 1.15rem; color: var(--stitch); flex: none; }
+.role-option span { display: block; margin-top: 0.2rem; color: var(--ink-soft); font-size: var(--text-s); }

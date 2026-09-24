@@ -1,0 +1,31 @@
+/* footer.css */
+.site-footer {
+  margin-top: var(--s-8);
+  padding-block: var(--s-7) var(--s-5);
+  border-top: 4px dashed var(--stitch);
+  background: var(--surface-strong);
+  color: #dbe4f2;
+}
+.site-footer a { color: #fff; }
+
+.site-footer__grid {
+  display: grid;
+  gap: var(--s-6);
+}
+@media (min-width: 48em) {
+  .site-footer__grid { grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); }
+}
+
+.site-footer .brand { color: #fff; }
+.site-footer .brand svg { color: #fff; }
+.site-footer p { max-width: 42ch; margin-top: var(--s-3); }
+.site-footer h2 { margin-bottom: var(--s-3); font-size: 1.05rem; color: #fff; }
+.site-footer ul { list-style: none; display: grid; gap: var(--s-2); }
+
+.site-footer__legal {
+  margin-top: var(--s-6);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--board-line);
+  font-size: var(--text-xs);
+  color: var(--board-muted);
+}
