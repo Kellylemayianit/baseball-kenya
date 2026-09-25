@@ -1,23 +1,15 @@
-// _middleware.js — runs before every route under /api/private/*. It's the
-// second half of the access check: the Access Application configured in
-// the Cloudflare dashboard already stops an unauthenticated browser from
-// reaching this far, but this still verifies the JWT properly (rather than
-// trusting the header blindly) and resolves it to a platform user, because
-// a Worker should never trust a header's presence alone.
-import { verifyAccessRequest, resolveUser } from '../../../server-lib/access.js';
+// _middleware.js — runs before every route under /api/private/*. Every
+// user created (whether by public signup or by an admin via
+// POST /api/private/users) already has a role at creation time, so there's
+// no separate "authenticated but not provisioned" state to handle here
+// the way there was under Access — a valid session always resolves to a
+// user with a role.
+import { getSessionUser } from '../../../server-lib/session.js';
 import { json } from '../../../server-lib/respond.js';
 
 export async function onRequest(context) {
-  const identity = await verifyAccessRequest(context.request, context.env);
-  if (!identity) {
-    return json({ error: 'Sign in required.' }, { status: 401 });
-  }
-  const user = await resolveUser(context.env, identity);
-  if (!user) {
-    return json({
-      error: `Signed in as ${identity.email}, but no role is set up for this account yet. Ask the site admin to add you.`,
-    }, { status: 403 });
-  }
+  const user = await getSessionUser(context.env, context.request);
+  if (!user) return json({ error: 'Sign in required.' }, { status: 401 });
   context.data.user = user;
   return context.next();
 }

@@ -1,10 +1,9 @@
 # wrangler.toml — Cloudflare Pages configuration for this project.
-# Values you must fill in are marked FILL IN. Full walkthrough: docs/deploy.md.
+# One value you must fill in, marked FILL IN below. Full walkthrough: docs/deploy.md.
 
 name = "baseball-kenya"
 compatibility_date = "2026-09-01"
 pages_build_output_dir = "."
-
 
 # D1 database binding. The database_id is filled in for you by
 # `wrangler d1 create baseball-kenya` — copy the id it prints into the line
@@ -12,24 +11,4 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "baseball-kenya"
-database_id = "ba384f08-addc-4b8e-9897-b368dfbabb22"
-
-# Non-secret config the Worker reads at request time (server-lib/access.js).
-[vars]
-ENVIRONMENT = "production"
-# Your Zero Trust team domain, e.g. "https://kellylemayianit.cloudflareaccess.com"
-# (Zero Trust dashboard -> Settings -> Custom Pages shows it, or it's in the
-# URL any time you're in the Zero Trust dashboard).
-ACCESS_TEAM_DOMAIN = "FILL IN — e.g. https://your-team-name.cloudflareaccess.com"
-# The GENERAL Access Application's Audience (AUD) — protects /api/private/*,
-# open to anyone your policy allows (coaches, team managers, fans,
-# federation admins). Copy from that application's Overview tab.
-ACCESS_AUD = "FILL IN — from the general Access Application's Overview tab"
-# The OWNER-ONLY Access Application's Audience — a SEPARATE application
-# protecting only /owner/*, with a policy that allows just your own email.
-# See docs/deploy.md, "Two Access Applications, not one".
-ACCESS_OWNER_AUD = "FILL IN — from the owner-only Access Application's Overview tab"
-
-# For local development, don't edit the [vars] above — copy
-# .dev.vars.example to .dev.vars instead (gitignored) and `wrangler pages
-# dev` will use those values automatically. See docs/deploy.md.
+database_id = "FILL IN — from `wrangler d1 create baseball-kenya`"

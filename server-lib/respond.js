@@ -1,8 +1,11 @@
 // respond.js — tiny JSON response helpers so every route file stays short.
 import { ApiError } from './d1.js';
 
-export const json = (data, init = {}) =>
-  new Response(JSON.stringify(data), { headers: { 'content-type': 'application/json' }, ...init });
+export const json = (data, init = {}) => {
+  const headers = new Headers({ 'content-type': 'application/json' });
+  if (init.headers) new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+  return new Response(JSON.stringify(data), { ...init, headers });
+};
 
 // Wraps a route handler: ApiError becomes the right HTTP status with a
 // { error: message } body the frontend's existing error handling already

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Kenya baseball hub — static frontend + Cloudflare Pages Functions API on D1, identity via Cloudflare Access.",
+  "description": "Kenya baseball hub — static frontend + Cloudflare Pages Functions API on D1, with email/password authentication.",
   "scripts": {
     "dev": "wrangler pages dev . --compatibility-date=2026-09-01",
     "deploy": "wrangler pages deploy .",
@@ -11,9 +11,6 @@
     "db:migrate:remote": "wrangler d1 migrations apply baseball-kenya --remote"
   },
   "license": "ISC",
-  "dependencies": {
-    "jose": "^6.2.12"
-  },
   "devDependencies": {
     "wrangler": "^4.136.3"
   }

@@ -1,13 +1,15 @@
+import { hashPassword } from './password.js';
+
 // d1.js — every query the API makes. Same function names, same inputs, same
 // validation and same permission checks as the old in-memory src/services/api.js
 // had, and the same return shapes the frontend already expects — this file
 // is that file's real-database replacement, not a new design.
 //
 // A note on `actor`: every mutating function here takes an actor resolved
-// by server-lib/access.js from a verified Cloudflare Access identity, never
-// from anything the client sent in the request body. That's the one
-// structural change from the demo: permission can no longer be spoofed by
-// editing a JS object in the browser console.
+// from the signed-in session (see server-lib/session.js), never from
+// anything the client sent in the request body. That's the one structural
+// change from the demo: permission can no longer be spoofed by editing a
+// JS object in the browser console.
 
 export const POSITIONS = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH', 'UT'];
 export const INNINGS = 7;
@@ -289,3 +291,57 @@ export async function sendBackMatch(env, matchId, note, actor) {
 }
 
 export { ApiError };
+
+/* ---------- Account provisioning --------------------------------------------
+   Nobody gets a role by signing up for themselves — POST /api/auth/signup
+   only ever creates a 'fan'. Every other role is created here, by someone
+   who already has the right to grant it:
+     - 'federation' accounts: only the platform admin (super) can create
+       one, and must assign it an orgId.
+     - 'player' / 'coach' / 'team' accounts: the platform admin, that
+       team's federation admin, or that team's existing staff can create
+       one, always scoped to a specific team.
+     - 'super' is never created through this endpoint at all — the one
+       platform-admin account is seeded directly via a migration, on
+       purpose, so it can never be granted through the API even by another
+       super account. */
+export async function createUserAccount(env, { email, password, name, role, teamId, playerId, orgId }, actor) {
+  const cleanEmail = clean(email, 120).toLowerCase();
+  const cleanName = clean(name, 60);
+  if (!/^\S+@\S+\.\S+$/.test(cleanEmail)) refuse('Enter a valid email address.');
+  if (!password || String(password).length < 8) refuse('Password must be at least 8 characters.');
+  if (!cleanName) refuse('Enter a name.');
+  if (!['player', 'coach', 'team', 'federation'].includes(role)) refuse('Pick a valid role.');
+
+  let scope = { teamId: null, playerId: null, orgId: null };
+
+  if (role === 'federation') {
+    if (!isSuper(actor)) refuse('Only the site admin can create federation accounts.', 403);
+    const org = await env.DB.prepare('SELECT id FROM organizations WHERE id = ?1').bind(orgId).first();
+    if (!org) refuse('Pick an organisation.');
+    scope.orgId = org.id;
+  } else {
+    const team = await env.DB.prepare('SELECT id, org_id FROM teams WHERE id = ?1').bind(teamId).first();
+    if (!team) refuse('Pick a team.');
+    const allowed = isSuper(actor) || moderatesOrg(actor, team.org_id) || managesTeam(actor, team.id);
+    if (!allowed) refuse('You can only add people to your own team.', 403);
+    scope.teamId = team.id;
+    if (role === 'player') {
+      if (!playerId) refuse('Pick a player from the roster.');
+      const player = await env.DB.prepare('SELECT id FROM players WHERE id = ?1 AND team_id = ?2').bind(playerId, team.id).first();
+      if (!player) refuse('That player is not on this team.');
+      scope.playerId = player.id;
+    }
+  }
+
+  const dupe = await env.DB.prepare('SELECT 1 FROM users WHERE email = ?1').bind(cleanEmail).first();
+  if (dupe) refuse('An account with that email already exists.');
+
+  const id = newId('u');
+  const passwordHash = await hashPassword(String(password));
+  await env.DB.prepare(
+    'INSERT INTO users (id, role, name, email, password_hash, team_id, player_id, org_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)',
+  ).bind(id, role, cleanName, cleanEmail, passwordHash, scope.teamId, scope.playerId, scope.orgId).run();
+
+  return { id, role, name: cleanName, email: cleanEmail, ...scope };
+}

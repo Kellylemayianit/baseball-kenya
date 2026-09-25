@@ -1,10 +1,7 @@
-// auth.js — the session, backed by Cloudflare Access. There is no password
-// and no login form here: signIn() sends the browser to a path Access
-// protects, which is what makes Cloudflare show its own login screen
-// (Google, GitHub, one-time email code — whatever your Zero Trust team is
-// configured with); signOut() clears the Access session the same way.
-// getUser()/can.* are the only things the rest of the app calls, so this
-// file is the one seam between "how identity works" and everything else.
+// auth.js — the session, backed by a real email/password login stored in
+// D1 (server-lib/password.js, server-lib/session.js). getUser()/can.* are
+// the only things the rest of the app calls, so this file is the one seam
+// between "how identity works" and everything else.
 
 export const ROLE_LABELS = {
   player: 'Player', coach: 'Coach', team: 'Team manager',
@@ -16,29 +13,26 @@ export const ROLE_ICONS = {
 };
 
 let user = null;
-let pendingMessage = null; // set when Access authenticated someone with no role yet
-let resolved = false;      // true once the first /api/private/me check has run
+let resolved = false; // true once the first /api/auth/me check has run
 const listeners = new Set();
 
 export const getUser = () => user;
 export const isResolved = () => resolved;
-export const getPendingMessage = () => pendingMessage;
+
+async function readJsonResponse(res) {
+  const contentType = res.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) throw new Error('Something went wrong.');
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+  return data;
+}
 
 // Called once on boot (see src/app.js) and again after anything that could
 // change who's signed in. Safe to call repeatedly — it never throws.
 export async function refreshSession() {
   try {
-    const res = await fetch('/api/private/me', { credentials: 'same-origin' });
-    const contentType = res.headers.get('content-type') ?? '';
-    if (!contentType.includes('application/json')) {
-      // Access redirected to its own login page: nobody is signed in.
-      user = null;
-      pendingMessage = null;
-    } else {
-      const data = await res.json();
-      if (res.ok) { user = data; pendingMessage = null; }
-      else { user = null; pendingMessage = res.status === 403 ? data.error : null; }
-    }
+    const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
+    user = res.ok ? await readJsonResponse(res) : null;
   } catch {
     user = null;
   }
@@ -47,20 +41,30 @@ export async function refreshSession() {
   return user;
 }
 
-// Sends the browser to a Cloudflare Access–protected path. Someone without
-// a session gets Access's own login screen; the path itself (see
-// functions/api/private/login.js) just bounces back into the app once
-// Access has authenticated them.
-export function signIn() {
-  const back = location.hash || '#/dashboard';
-  location.href = `/api/private/login?return=${encodeURIComponent(back)}`;
+export async function login(email, password) {
+  const res = await fetch('/api/auth/login', {
+    method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  user = await readJsonResponse(res);
+  listeners.forEach((fn) => fn(user));
+  return user;
 }
 
-// Clears the Access session cookie. /cdn-cgi/access/logout is served by
-// Cloudflare at the edge for any zone with an Access application on it —
-// no team-domain config needed client-side.
-export function signOut() {
-  location.href = '/cdn-cgi/access/logout';
+export async function signup(email, password, name) {
+  const res = await fetch('/api/auth/signup', {
+    method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email, password, name }),
+  });
+  user = await readJsonResponse(res);
+  listeners.forEach((fn) => fn(user));
+  return user;
+}
+
+export async function signOut() {
+  try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch { /* clear local state regardless */ }
+  user = null;
+  listeners.forEach((fn) => fn(user));
 }
 
 export function onAuthChange(fn) {
@@ -70,8 +74,8 @@ export function onAuthChange(fn) {
 
 /* ---------- Permission checks ----------------------------------------------
    Client-side only — these decide what the UI shows. The real check for
-   every write happens again in functions/api/**, against the Access
-   session, because a browser-side check can always be bypassed. */
+   every write happens again in functions/api/**, against the session
+   cookie, because a browser-side check can always be bypassed. */
 const isSuper = (actor) => actor?.role === 'super';
 const isFederation = (actor) => actor?.role === 'federation';
 const isTeamStaff = (actor) => actor?.role === 'coach' || actor?.role === 'team';
@@ -91,6 +95,8 @@ export const can = {
   moderatesOrg: (actor, orgId) => isSuper(actor) || (isFederation(actor) && actor.orgId === orgId),
 
   editOwnProfile: (actor, playerId) => isSuper(actor) || actor?.playerId === playerId || isTeamStaff(actor),
+
+  canProvision: (actor) => isSuper(actor) || isFederation(actor) || isTeamStaff(actor),
 
   isSignedIn: (actor) => Boolean(actor),
 };

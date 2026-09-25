@@ -64,3 +64,6 @@ export const createFixture = (input, _actor) => call('/private/matches', { metho
 export const submitMatchResult = (matchId, input, _actor) => call(`/private/matches/${matchId}/result`, { method: 'POST', body: input });
 export const verifyMatch = (matchId, _actor) => call(`/private/matches/${matchId}/verify`, { method: 'POST' });
 export const sendBackMatch = (matchId, note, _actor) => call(`/private/matches/${matchId}/send-back`, { method: 'POST', body: { note } });
+
+/* ---------- Account provisioning -------------------------------------------------- */
+export const createUserAccount = (input) => call('/private/users', { method: 'POST', body: input });

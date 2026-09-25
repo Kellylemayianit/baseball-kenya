@@ -6,30 +6,50 @@ import {
   html, formatDate, formatTime, formatRecord, totalRuns, pluralize, toast,
 } from '../utilities/helpers.js';
 import { icon } from '../utilities/icons.js';
-import { getUser, signIn, can, ROLE_LABELS, ROLE_ICONS, getPendingMessage } from '../utilities/auth.js';
+import { getUser, login, signup, can, ROLE_ICONS } from '../utilities/auth.js';
 import * as api from '../services/api.js';
 import { loadDashboard } from '../services/dataLoader.js';
 import { bindMatchActions, canSeeScore } from '../components/matchCard.js';
 import { openMatchFormModal } from '../components/matchFormModal.js';
 import { crest } from '../components/teamCard.js';
 
-/* ---------- Signed-out gate and team registration ------------------------- */
+/* ---------- Signed-out gate: sign in, create an account, register a team --- */
+function loginForm() {
+  return html`
+    <form class="stack" data-form="login" novalidate style="--stack:var(--s-4)">
+      <div class="field"><label for="li-email">Email</label><input class="input" id="li-email" name="email" type="email" required autocomplete="username"></div>
+      <div class="field"><label for="li-password">Password</label><input class="input" id="li-password" name="password" type="password" required autocomplete="current-password"></div>
+      <p class="form-error" role="alert" data-error hidden></p>
+      <button class="btn btn--primary" type="submit">Sign in</button>
+    </form>`;
+}
+
+function signupForm() {
+  return html`
+    <form class="stack" data-form="signup" novalidate style="--stack:var(--s-4)" hidden>
+      <p class="hint">Creates a fan account — follow teams and see their fixtures. Coach, team-manager, player and federation accounts are set up for you by your team or federation, not through signup.</p>
+      <div class="field"><label for="su-name">Name</label><input class="input" id="su-name" name="name" required maxlength="60" autocomplete="name"></div>
+      <div class="field"><label for="su-email">Email</label><input class="input" id="su-email" name="email" type="email" required autocomplete="username"></div>
+      <div class="field"><label for="su-password">Password</label><input class="input" id="su-password" name="password" type="password" required minlength="8" autocomplete="new-password"><span class="hint">At least 8 characters.</span></div>
+      <p class="form-error" role="alert" data-error hidden></p>
+      <button class="btn btn--primary" type="submit">Create account</button>
+    </form>`;
+}
+
 function gate(ctx) {
-  const pending = getPendingMessage();
   const page = html`
     <div class="container gate">
       <div>
         <h1>Dashboard</h1>
-        <p class="muted" style="margin-top:var(--s-3)">Every kind of person on the platform signs in here: players, coaches, team managers, fans, federation admins and the site admin.</p>
-        ${pending
-          ? html`<p class="callout" style="margin-top:var(--s-4)">${pending}</p>`
-          : html`<p style="margin-top:var(--s-4)"><button class="btn btn--primary" type="button" data-access-signin>${icon('user')} Sign in</button></p>`}
-        <ul class="gate__roles" style="list-style:none;padding:0;margin-top:var(--s-4)">
-          ${Object.keys(ROLE_LABELS).filter((id) => id !== 'super').map((id) => html`
-            <li class="role-option" style="cursor:default;display:flex;align-items:center;gap:0.6rem">
-              ${icon(ROLE_ICONS[id])} <strong style="font-family:var(--font-display)">${ROLE_LABELS[id]}</strong>
-            </li>`)}
-        </ul>
+        <p class="muted" style="margin-top:var(--s-3)">Sign in to follow teams, manage a roster, enter results, or review registrations — whatever your account can do.</p>
+        <div class="panel" style="margin-top:var(--s-4);max-width:26rem">
+          <nav class="tabs" aria-label="Sign in or create an account" style="margin-bottom:var(--s-4)">
+            <button class="tab" type="button" data-auth-tab="login" aria-current="page">Sign in</button>
+            <button class="tab" type="button" data-auth-tab="signup">Create an account</button>
+          </nav>
+          ${loginForm()}
+          ${signupForm()}
+        </div>
       </div>
 
       <section class="panel" aria-labelledby="reg-head">
@@ -57,7 +77,47 @@ function gate(ctx) {
     html: page,
     mount(root) {
       root.addEventListener('click', (event) => {
-        if (event.target.closest('[data-access-signin]')) signIn();
+        const tabBtn = event.target.closest('[data-auth-tab]');
+        if (tabBtn) {
+          const target = tabBtn.dataset.authTab;
+          root.querySelectorAll('[data-auth-tab]').forEach((b) => b.toggleAttribute('aria-current', b === tabBtn));
+          root.querySelector('[data-form="login"]').hidden = target !== 'login';
+          root.querySelector('[data-form="signup"]').hidden = target !== 'signup';
+        }
+      }, { signal: ctx.signal });
+
+      const loginEl = root.querySelector('[data-form="login"]');
+      loginEl.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const error = loginEl.querySelector('[data-error]');
+        const submit = loginEl.querySelector('[type="submit"]');
+        error.hidden = true;
+        submit.disabled = true;
+        try {
+          await login(loginEl.elements.email.value, loginEl.elements.password.value);
+          ctx.refresh();
+        } catch (err) {
+          error.textContent = err.message;
+          error.hidden = false;
+          submit.disabled = false;
+        }
+      }, { signal: ctx.signal });
+
+      const signupEl = root.querySelector('[data-form="signup"]');
+      signupEl.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const error = signupEl.querySelector('[data-error]');
+        const submit = signupEl.querySelector('[type="submit"]');
+        error.hidden = true;
+        submit.disabled = true;
+        try {
+          await signup(signupEl.elements.email.value, signupEl.elements.password.value, signupEl.elements.name.value);
+          ctx.refresh();
+        } catch (err) {
+          error.textContent = err.message;
+          error.hidden = false;
+          submit.disabled = false;
+        }
       }, { signal: ctx.signal });
 
       const form = root.querySelector('[data-form="register"]');
@@ -213,7 +273,29 @@ function teamStaffView(d, user, tab) {
                 </tr>`)}
             </tbody>
           </table>
-        </div>` : empty('No players yet', 'Add your first player above.')}`;
+        </div>` : empty('No players yet', 'Add your first player above.')}
+      ${panel('Give someone a login', html`
+        <form class="stack" data-form="create-account" novalidate style="--stack:var(--s-4)">
+          <input type="hidden" name="teamId" value="${team.id}">
+          <div class="form-grid">
+            <div class="field"><label for="ac-role">Account type</label>
+              <select class="select" id="ac-role" name="role">
+                <option value="player">Player (linked to a roster spot)</option>
+                <option value="coach">Coach</option>
+                <option value="team">Team manager</option>
+              </select></div>
+            <div class="field" data-player-field ${d.roster.length ? '' : 'hidden'}>
+              <label for="ac-player">Player</label>
+              <select class="select" id="ac-player" name="playerId">
+                ${d.roster.map((p) => html`<option value="${p.id}">#${p.jersey} ${p.name}</option>`)}
+              </select></div>
+            <div class="field"><label for="ac-name">Name</label><input class="input" id="ac-name" name="name" required maxlength="60"></div>
+            <div class="field"><label for="ac-email">Email</label><input class="input" id="ac-email" name="email" type="email" required></div>
+            <div class="field"><label for="ac-password">Temporary password</label><input class="input" id="ac-password" name="password" type="text" required minlength="8"><span class="hint">Share this with them directly — they can't reset it themselves yet, so pick something you can hand over safely.</span></div>
+          </div>
+          <p class="form-error" role="alert" data-error hidden></p>
+          <div><button class="btn btn--primary" type="submit">Create login</button></div>
+        </form>`, 'Only affects who can sign in — it doesn\u2019t add them to the roster table above.')}`;
   } else if (tab === 'profile') {
     title = 'Team profile';
     lead = 'What visitors see on your public team page.';
@@ -310,6 +392,7 @@ function orgView(d, user, tab) {
     { id: 'overview', label: 'Overview', icon: 'home' },
     { id: 'approvals', label: 'Approvals', icon: 'clipboard', count: review },
     { id: 'fixtures', label: 'Fixtures', icon: 'calendar' },
+    { id: 'accounts', label: 'Accounts', icon: 'user' },
   ];
   if (user.role === 'super') items.push({ id: 'organizations', label: 'Organizations', icon: 'organization' });
 
@@ -383,6 +466,41 @@ function orgView(d, user, tab) {
     lead = 'Schedule games. Teams see them on their dashboard straight away.';
     actions = html`<button class="btn btn--primary" type="button" data-do="new-fixture">${icon('plus')} Schedule fixture</button>`;
     content = gamesTable(d.scheduled, ref, user, 'No fixtures scheduled');
+  } else if (tab === 'accounts') {
+    title = 'Accounts';
+    lead = 'Create logins for coaches, team managers, players, and — if you\u2019re the site admin — other federation admins.';
+    const inScopeTeams = d.teams.filter((t) => t.status === 'approved' && (user.role === 'super' || d.orgs.some((o) => o.id === t.orgId)));
+    content = panel('Create a login', html`
+      <form class="stack" data-form="create-account" novalidate style="--stack:var(--s-4);max-width:32rem">
+        <div class="form-grid">
+          <div class="field"><label for="ac-role">Account type</label>
+            <select class="select" id="ac-role" name="role">
+              <option value="coach">Coach</option>
+              <option value="team">Team manager</option>
+              <option value="player">Player</option>
+              ${user.role === 'super' ? html`<option value="federation">Federation admin</option>` : ''}
+            </select></div>
+          <div class="field" data-team-field>
+            <label for="ac-team">Team</label>
+            <select class="select" id="ac-team" name="teamId">
+              ${inScopeTeams.map((t) => html`<option value="${t.id}">${t.name}</option>`)}
+            </select></div>
+          <div class="field" data-org-field hidden>
+            <label for="ac-org">Organisation</label>
+            <select class="select" id="ac-org" name="orgId">
+              ${d.organizations.map((o) => html`<option value="${o.id}">${o.name}</option>`)}
+            </select></div>
+          <div class="field" data-player-field hidden>
+            <label for="ac-player">Player</label>
+            <select class="select" id="ac-player" name="playerId"></select>
+            <span class="hint" data-player-hint></span></div>
+          <div class="field"><label for="ac-name">Name</label><input class="input" id="ac-name" name="name" required maxlength="60"></div>
+          <div class="field"><label for="ac-email">Email</label><input class="input" id="ac-email" name="email" type="email" required></div>
+          <div class="field"><label for="ac-password">Temporary password</label><input class="input" id="ac-password" name="password" type="text" required minlength="8"><span class="hint">Share this with them directly — they can't reset it themselves yet.</span></div>
+        </div>
+        <p class="form-error" role="alert" data-error hidden></p>
+        <div><button class="btn btn--primary" type="submit">Create login</button></div>
+      </form>`);
   } else {
     content = html`
       <div class="stats">
@@ -462,6 +580,39 @@ export async function dashboardPage(ctx) {
         }
       }, { signal: ctx.signal });
 
+      root.addEventListener('change', async (event) => {
+        const form = event.target.closest('[data-form="create-account"]');
+        if (!form) return;
+
+        if (event.target.name === 'role') {
+          const role = event.target.value;
+          const teamField = form.querySelector('[data-team-field]');
+          const orgField = form.querySelector('[data-org-field]');
+          const playerField = form.querySelector('[data-player-field]');
+          if (teamField) teamField.hidden = role === 'federation';
+          if (orgField) orgField.hidden = role !== 'federation';
+          if (playerField) {
+            playerField.hidden = role !== 'player';
+            if (role === 'player') form.querySelector('[name="teamId"]')?.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
+
+        if (event.target.name === 'teamId') {
+          const playerSelect = form.querySelector('[name="playerId"]');
+          const playerField = form.querySelector('[data-player-field]');
+          if (!playerSelect || playerField?.hidden) return;
+          const hint = form.querySelector('[data-player-hint]');
+          if (hint) hint.textContent = 'Loading roster…';
+          try {
+            const roster = await api.listPlayers(event.target.value);
+            playerSelect.innerHTML = roster.map((p) => `<option value="${p.id}">#${p.jersey} ${p.name.replace(/[<>&"]/g, '')}</option>`).join('');
+            if (hint) hint.textContent = roster.length ? '' : 'This team has no roster yet — add players first.';
+          } catch {
+            if (hint) hint.textContent = 'Could not load the roster.';
+          }
+        }
+      }, { signal: ctx.signal });
+
       root.addEventListener('submit', async (event) => {
         const form = event.target.closest('[data-form]');
         if (!form) return;
@@ -481,6 +632,9 @@ export async function dashboardPage(ctx) {
           } else if (form.dataset.form === 'player-bio') {
             await api.updatePlayerBio(d.player.id, values.bio, getUser());
             toast('Profile saved.', { type: 'ok' });
+          } else if (form.dataset.form === 'create-account') {
+            const created = await api.createUserAccount(values);
+            toast(`Login created for ${created.email}.`, { type: 'ok' });
           }
           ctx.refresh();
         } catch (err) {

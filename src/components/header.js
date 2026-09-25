@@ -3,7 +3,7 @@
 // demo state — see src/utilities/auth.js.
 import { html, raw } from '../utilities/helpers.js';
 import { icon } from '../utilities/icons.js';
-import { signIn, signOut, ROLE_LABELS, ROLE_ICONS } from '../utilities/auth.js';
+import { signOut, ROLE_LABELS, ROLE_ICONS } from '../utilities/auth.js';
 import { toggleTheme } from '../utilities/theme.js';
 
 const NAV = [
@@ -25,7 +25,7 @@ function themeToggle() {
 
 function sessionMenu(user) {
   if (!user) {
-    return html`<button class="btn btn--outline btn--sm" type="button" data-access-signin>${icon('user')} Sign in</button>`;
+    return html`<a class="btn btn--outline btn--sm" href="#/dashboard">${icon('user')} Sign in</a>`;
   }
   return html`
     <details class="session">
@@ -67,11 +67,6 @@ export function bindHeader(root, { onNavigate }) {
 
     if (event.target.closest('[data-theme-toggle]')) {
       toggleTheme();
-      return;
-    }
-
-    if (event.target.closest('[data-access-signin]')) {
-      signIn();
       return;
     }
 
