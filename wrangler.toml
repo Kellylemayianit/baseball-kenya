@@ -11,4 +11,4 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "baseball-kenya"
-database_id = "FILL IN — from `wrangler d1 create baseball-kenya`"
+database_id = "ba384f08-addc-4b8e-9897-b368dfbabb22"
